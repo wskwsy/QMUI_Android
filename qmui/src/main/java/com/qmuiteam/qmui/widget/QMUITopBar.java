@@ -120,7 +120,8 @@ public class QMUITopBar extends RelativeLayout {
         mTopBarSeparatorColor = array.getColor(R.styleable.QMUITopBar_qmui_topbar_separator_color,
                 ContextCompat.getColor(context, R.color.qmui_config_color_separator));
         mTopBarSeparatorHeight = array.getDimensionPixelSize(R.styleable.QMUITopBar_qmui_topbar_separator_height, 1);
-        mTopBarBgColor = array.getColor(R.styleable.QMUITopBar_qmui_topbar_bg_color, Color.WHITE);
+        //mTopBarBgColor = array.getColor(R.styleable.QMUITopBar_qmui_topbar_bg_color, Color.WHITE);
+        mTopBarBgColor=array.getResourceId(R.styleable.QMUITopBar_qmui_topbar_bg_color,0);
         getCommonFieldFormTypedArray(context, array);
         boolean hasSeparator = array.getBoolean(R.styleable.QMUITopBar_qmui_topbar_need_separator, true);
         array.recycle();
@@ -655,11 +656,11 @@ public class QMUITopBar extends RelativeLayout {
         if (enabled) {
             if (mTopBarBgWithSeparatorDrawableCache == null) {
                 mTopBarBgWithSeparatorDrawableCache = QMUIDrawableHelper.
-                        createItemSeparatorBg(mTopBarSeparatorColor, mTopBarBgColor, mTopBarSeparatorHeight, false);
+                        createItemSeparatorBg(mTopBarSeparatorColor, mTopBarBgColor, mTopBarSeparatorHeight, false,getContext());
             }
             QMUIViewHelper.setBackgroundKeepingPadding(this, mTopBarBgWithSeparatorDrawableCache);
         } else {
-            QMUIViewHelper.setBackgroundColorKeepPadding(this, mTopBarBgColor);
+            QMUIViewHelper.setBackgroundKeepPadding(this, mTopBarBgColor);
         }
     }
 

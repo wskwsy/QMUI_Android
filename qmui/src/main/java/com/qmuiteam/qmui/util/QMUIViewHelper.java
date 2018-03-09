@@ -19,6 +19,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -125,6 +126,14 @@ public class QMUIViewHelper {
     public static void setBackgroundColorKeepPadding(View view, @ColorInt int color) {
         int[] padding = new int[]{view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom()};
         view.setBackgroundColor(color);
+        view.setPadding(padding[0], padding[1], padding[2], padding[3]);
+    }
+
+
+    public static void setBackgroundKeepPadding(View view, @DrawableRes int color) {
+        int[] padding = new int[] { view.getPaddingLeft(), view.getPaddingTop(),
+                view.getPaddingRight(), view.getPaddingBottom() };
+        view.setBackgroundResource(color);
         view.setPadding(padding[0], padding[1], padding[2], padding[3]);
     }
 

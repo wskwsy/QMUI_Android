@@ -93,7 +93,7 @@ public class QDDrawableHelperFragment extends BaseFragment {
 
         // 创建带上分隔线或下分隔线的 Drawable
         LayerDrawable separatorLayerDrawable = QMUIDrawableHelper.createItemSeparatorBg(ContextCompat.getColor(getContext(), R.color.app_color_theme_7),
-                ContextCompat.getColor(getContext(), R.color.app_color_theme_6), QMUIDisplayHelper.dp2px(getContext(), 2), true);
+                 R.drawable.app_color_theme_6, QMUIDisplayHelper.dp2px(getContext(), 2), true);
         QMUIViewHelper.setBackgroundKeepingPadding(mSeparatorView, separatorLayerDrawable);
 
         // 从一个 View 创建 Bitmap

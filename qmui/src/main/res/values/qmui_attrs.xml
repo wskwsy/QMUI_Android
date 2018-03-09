@@ -77,7 +77,7 @@
         <attr name="qmui_topbar_need_separator" format="boolean"/>
         <attr name="qmui_topbar_separator_color" format="color"/>
         <attr name="qmui_topbar_separator_height" format="dimension"/>
-        <attr name="qmui_topbar_bg_color" format="color"/>
+        <attr name="qmui_topbar_bg_color" format="color|reference"/>
         <attr name="qmui_topbar_left_back_drawable_id" format="reference"/>
         <attr name="qmui_topbar_title_text_size" format="dimension"/>
         <attr name="qmui_topbar_title_text_size_with_subtitle" format="dimension"/>
