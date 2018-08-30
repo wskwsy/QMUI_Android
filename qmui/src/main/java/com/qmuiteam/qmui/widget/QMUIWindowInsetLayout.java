@@ -1,10 +1,10 @@
 package com.qmuiteam.qmui.widget;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Build;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.view.WindowInsetsCompat;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
@@ -53,15 +53,20 @@ public class QMUIWindowInsetLayout extends FrameLayout implements IWindowInsetLa
     }
 
     @Override
-    public boolean applySystemWindowInsets21(WindowInsetsCompat insets) {
+    public boolean applySystemWindowInsets21(Object insets) {
         return mQMUIWindowInsetHelper.defaultApplySystemWindowInsets21(this, insets);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (ViewCompat.getFitsSystemWindows(this)) {
-            ViewCompat.requestApplyInsets(this);
-        }
+        ViewCompat.requestApplyInsets(this);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // xiaomi 8 not reapply insets default...
+        ViewCompat.requestApplyInsets(this);
     }
 }

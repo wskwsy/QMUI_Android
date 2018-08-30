@@ -1,5 +1,6 @@
 package com.qmuiteam.qmui.widget;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.design.widget.AppBarLayout;
@@ -7,6 +8,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.WindowInsetsCompat;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.WindowInsets;
 
 import com.qmuiteam.qmui.util.QMUIWindowInsetHelper;
 
@@ -71,7 +73,7 @@ public class QMUIAppBarLayout extends AppBarLayout implements IWindowInsetLayout
     }
 
     @Override
-    public boolean applySystemWindowInsets21(WindowInsetsCompat insets) {
+    public boolean applySystemWindowInsets21(Object insets) {
         return true;
     }
 }

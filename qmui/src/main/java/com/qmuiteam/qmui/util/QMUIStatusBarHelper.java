@@ -7,8 +7,10 @@ import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IntDef;
+import android.support.v4.view.ViewCompat;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import java.lang.annotation.Retention;
@@ -35,13 +37,17 @@ public class QMUIStatusBarHelper {
     private static Integer sTransparentValue;
 
     public static void translucent(Activity activity) {
-        translucent(activity, 0x40000000);
+        translucent(activity.getWindow());
+    }
+
+    public static void translucent(Window window) {
+        translucent(window, 0x40000000);
     }
 
     private static boolean supportTranslucent() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
-                // Essential Phone 不支持沉浸式，否则系统又不从状态栏下方开始布局又给你下发 WindowInsets
-                && !Build.BRAND.toLowerCase().contains("essential");
+                // Essential Phone 在 Android 8 之前沉浸式做得不全，系统不从状态栏顶部开始布局却会下发 WindowInsets
+                && !(QMUIDeviceHelper.isEssentialPhone() && Build.VERSION.SDK_INT < 26);
     }
 
     /**
@@ -50,22 +56,29 @@ public class QMUIStatusBarHelper {
      *
      * @param activity 需要被设置沉浸式状态栏的 Activity。
      */
-    @TargetApi(19)
     public static void translucent(Activity activity, @ColorInt int colorOn5x) {
+        Window window = activity.getWindow();
+        translucent(window, colorOn5x);
+    }
+
+    @TargetApi(19)
+    public static void translucent(Window window, @ColorInt int colorOn5x) {
         if (!supportTranslucent()) {
             // 版本小于4.4，绝对不考虑沉浸式
             return;
         }
         // 小米和魅族4.4 以上版本支持沉浸式
         if (QMUIDeviceHelper.isMeizu() || QMUIDeviceHelper.isMIUI()) {
-            Window window = activity.getWindow();
             window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             return;
         }
 
+        if (QMUINotchHelper.isNotchOfficialSupport()) {
+            handleDisplayCutoutMode(window);
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = activity.getWindow();
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && supportTransclentStatusBar6()) {
@@ -94,6 +107,40 @@ public class QMUIStatusBarHelper {
 //            if(transparentValue != null) {
 //                window.getDecorView().setSystemUiVisibility(transparentValue);
 //            }
+        }
+    }
+
+    @TargetApi(28)
+    private static void handleDisplayCutoutMode(final Window window) {
+        View decorView = window.getDecorView();
+        if (decorView != null) {
+            if (ViewCompat.isAttachedToWindow(decorView)) {
+                realHandleDisplayCutoutMode(window, decorView);
+            } else {
+                decorView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {
+                        v.removeOnAttachStateChangeListener(this);
+                        realHandleDisplayCutoutMode(window, v);
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {
+
+                    }
+                });
+            }
+        }
+    }
+
+    @TargetApi(28)
+    private static void realHandleDisplayCutoutMode(Window window, View decorView) {
+        if (decorView.getRootWindowInsets() != null &&
+                decorView.getRootWindowInsets().getDisplayCutout() != null) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams
+                    .LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            window.setAttributes(params);
         }
     }
 
@@ -202,7 +249,7 @@ public class QMUIStatusBarHelper {
         int systemUi = light ? View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR : View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
         systemUi = changeStatusBarModeRetainFlag(window, systemUi);
         decorView.setSystemUiVisibility(systemUi);
-        if(QMUIDeviceHelper.isMIUIV9()){
+        if (QMUIDeviceHelper.isMIUIV9()) {
             // MIUI 9 低于 6.0 版本依旧只能回退到以前的方案
             // https://github.com/QMUI/QMUI_Android/issues/160
             MIUISetStatusBarLightMode(window, light);
@@ -214,7 +261,7 @@ public class QMUIStatusBarHelper {
      * 设置状态栏字体图标为深色，需要 MIUIV6 以上
      *
      * @param window 需要设置的窗口
-     * @param light   是否把状态栏字体及图标颜色设置为深色
+     * @param light  是否把状态栏字体及图标颜色设置为深色
      * @return boolean 成功执行返回 true
      */
     @SuppressWarnings("unchecked")
@@ -242,10 +289,13 @@ public class QMUIStatusBarHelper {
     }
 
     /**
-     * 更改状态栏图标、文字颜色的方案是否是MIUI自家的， MIUI9之后用回Android原生实现
+     * 更改状态栏图标、文字颜色的方案是否是MIUI自家的， MIUI9 && Android 6 之后用回Android原生实现
      * 见小米开发文档说明：https://dev.mi.com/console/doc/detail?pId=1159
      */
     private static boolean isMIUICustomStatusBarLightModeImpl() {
+        if (QMUIDeviceHelper.isMIUIV9() && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
         return QMUIDeviceHelper.isMIUIV5() || QMUIDeviceHelper.isMIUIV6() ||
                 QMUIDeviceHelper.isMIUIV7() || QMUIDeviceHelper.isMIUIV8();
     }
@@ -255,16 +305,15 @@ public class QMUIStatusBarHelper {
      * 可以用来判断是否为 Flyme 用户
      *
      * @param window 需要设置的窗口
-     * @param light   是否把状态栏字体及图标颜色设置为深色
+     * @param light  是否把状态栏字体及图标颜色设置为深色
      * @return boolean 成功执行返回true
      */
     public static boolean FlymeSetStatusBarLightMode(Window window, boolean light) {
-
-        // flyme 在 6.2.0.0A 支持了 Android 官方的实现方案，旧的方案失效
-        Android6SetStatusBarLightMode(window, light);
-
         boolean result = false;
         if (window != null) {
+            // flyme 在 6.2.0.0A 支持了 Android 官方的实现方案，旧的方案失效
+            Android6SetStatusBarLightMode(window, light);
+
             try {
                 WindowManager.LayoutParams lp = window.getAttributes();
                 Field darkFlag = WindowManager.LayoutParams.class
@@ -390,9 +439,7 @@ public class QMUIStatusBarHelper {
             //状态栏高度大于25dp的平板，状态栏通常在下方
             sStatusbarHeight = 0;
         } else {
-            if (sStatusbarHeight <= 0
-                    || sStatusbarHeight > QMUIDisplayHelper.dp2px(context, STATUS_BAR_DEFAULT_HEIGHT_DP * 2)) {
-                //安卓默认状态栏高度为25dp，如果获取的状态高度大于2倍25dp的话，这个数值可能有问题，用回桌面定义的值从新获取。出现这种可能性较低，只有小部分手机出现
+            if (sStatusbarHeight <= 0) {
                 if (sVirtualDensity == -1) {
                     sStatusbarHeight = QMUIDisplayHelper.dp2px(context, STATUS_BAR_DEFAULT_HEIGHT_DP);
                 } else {

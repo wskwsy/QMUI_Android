@@ -1,6 +1,8 @@
 package com.qmuiteam.qmuidemo.fragment.home;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Parcelable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,13 +12,16 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.qmuiteam.qmui.util.QMUIViewHelper;
-import com.qmuiteam.qmui.widget.QMUITopBar;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.QMUIWindowInsetLayout;
+import com.qmuiteam.qmuidemo.QDMainActivity;
 import com.qmuiteam.qmuidemo.R;
 import com.qmuiteam.qmuidemo.base.BaseFragment;
 import com.qmuiteam.qmuidemo.base.BaseRecyclerAdapter;
 import com.qmuiteam.qmuidemo.base.RecyclerViewHolder;
 import com.qmuiteam.qmuidemo.decorator.GridDividerItemDecoration;
 import com.qmuiteam.qmuidemo.fragment.QDAboutFragment;
+import com.qmuiteam.qmuidemo.fragment.util.QDNotchHelperFragment;
 import com.qmuiteam.qmuidemo.model.QDItemDescription;
 
 import java.util.List;
@@ -29,10 +34,12 @@ import butterknife.ButterKnife;
  * @date 2016-10-20
  */
 
-public abstract class HomeController extends FrameLayout {
+public abstract class HomeController extends QMUIWindowInsetLayout {
 
-    @BindView(R.id.topbar) QMUITopBar mTopBar;
-    @BindView(R.id.recyclerView) RecyclerView mRecyclerView;
+    @BindView(R.id.topbar)
+    QMUITopBarLayout mTopBar;
+    @BindView(R.id.recyclerView)
+    RecyclerView mRecyclerView;
 
     private HomeControlListener mHomeControlListener;
     private ItemAdapter mItemAdapter;
@@ -78,7 +85,17 @@ public abstract class HomeController extends FrameLayout {
                 QDItemDescription item = mItemAdapter.getItem(pos);
                 try {
                     BaseFragment fragment = item.getDemoClass().newInstance();
-                    startFragment(fragment);
+                    if(fragment instanceof QDNotchHelperFragment){
+                        Context context = getContext();
+                        Intent intent = QDMainActivity.createNotchHelperIntent(context);
+                        context.startActivity(intent);
+                        if(context instanceof Activity){
+                            ((Activity)context).overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                        }
+                    }else{
+                        startFragment(fragment);
+                    }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

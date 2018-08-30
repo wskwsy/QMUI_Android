@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
@@ -187,13 +188,20 @@ public class QMUIDrawableHelper {
         }
 
         try {
+<<<<<<< HEAD
             Bitmap bitmap = Bitmap
                     .createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888);
+=======
+            Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                    : Bitmap.Config.RGB_565;
+            Bitmap bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, config);
+>>>>>>> 1bf96b51a7aaebde0171de611709b92dd32bc165
             Canvas canvas = new Canvas(bitmap);
             drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             drawable.draw(canvas);
             return bitmap;
         } catch (OutOfMemoryError e) {
+            e.printStackTrace();
             return null;
         }
     }

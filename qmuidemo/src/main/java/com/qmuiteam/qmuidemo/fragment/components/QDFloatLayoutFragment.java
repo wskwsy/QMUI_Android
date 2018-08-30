@@ -1,6 +1,7 @@
 package com.qmuiteam.qmuidemo.fragment.components;
 
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -10,22 +11,25 @@ import android.widget.TextView;
 
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.QMUIFloatLayout;
-import com.qmuiteam.qmui.widget.QMUITopBar;
+import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet;
-import com.qmuiteam.qmuidemo.manager.QDDataManager;
-import com.qmuiteam.qmuidemo.base.BaseFragment;
-import com.qmuiteam.qmuidemo.model.QDItemDescription;
 import com.qmuiteam.qmuidemo.R;
+import com.qmuiteam.qmuidemo.base.BaseFragment;
 import com.qmuiteam.qmuidemo.lib.annotation.Widget;
+import com.qmuiteam.qmuidemo.manager.QDDataManager;
+import com.qmuiteam.qmuidemo.model.QDItemDescription;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 @Widget(widgetClass = QMUIFloatLayout.class, iconRes = R.mipmap.icon_grid_float_layout)
 public class QDFloatLayoutFragment extends BaseFragment {
+    private static final String TAG = "QDFloatLayoutFragment";
 
-    @BindView(R.id.topbar) QMUITopBar mTopBar;
-    @BindView(R.id.qmuidemo_floatlayout) QMUIFloatLayout mFloatLayout;
+    @BindView(R.id.topbar)
+    QMUITopBarLayout mTopBar;
+    @BindView(R.id.qmuidemo_floatlayout)
+    QMUIFloatLayout mFloatLayout;
 
     private QDItemDescription mQDItemDescription;
 
@@ -39,6 +43,12 @@ public class QDFloatLayoutFragment extends BaseFragment {
         for (int i = 0; i < 8; i++) {
             addItemToFloatLayout(mFloatLayout);
         }
+        mFloatLayout.setOnLineCountChangeListener(new QMUIFloatLayout.OnLineCountChangeListener() {
+            @Override
+            public void onChange(int oldLineCount, int newLineCount) {
+                Log.i(TAG, "oldLineCount = " + oldLineCount + " ;newLineCount = " + newLineCount);
+            }
+        });
         return root;
     }
 
