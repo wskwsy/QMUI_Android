@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 group = 'com.qmuiteam'
-version = "0.0.1"
+version = "0.1.3"
 
 android {
 
@@ -27,7 +27,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly("com.android.support:design:$supportVersion")
+    compileOnly "com.android.support:design:$supportVersion"
     compileOnly project(':qmui')
 }
 

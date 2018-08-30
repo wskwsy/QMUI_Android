@@ -1,5 +1,6 @@
 package com.qmuiteam.qmuidemo.manager;
 
+import android.app.Activity;
 import android.content.Context;
 
 /**
@@ -9,43 +10,56 @@ import android.content.Context;
 public class QDUpgradeManager {
     public static final int INVALIDATE_VERSION_CODE = -1;
 
-    private static final int VERSION_1_0_7 = 107;
-
-    private static final int sCurrentVersion = VERSION_1_0_7;
+    public static final int VERSION_1_1_0 = 110;
+    public static final int VERSION_1_1_1 = 111;
+    public static final int VERSION_1_1_2 = 112;
+    public static final int VERSION_1_1_3 = 113;
+    public static final int VERSION_1_1_4 = 114;
+    public static final int VERSION_1_1_5 = 115;
+    public static final int VERSION_1_1_6 = 116;
+    public static final int VERSION_1_1_7 = 117;
+    private static final int sCurrentVersion = VERSION_1_1_7;
     private static QDUpgradeManager sQDUpgradeManager = null;
+    private UpgradeTipTask mUpgradeTipTask;
 
     private Context mContext;
 
-    private QDUpgradeManager(Context context){
+    private QDUpgradeManager(Context context) {
         mContext = context.getApplicationContext();
     }
 
-    public static final QDUpgradeManager getInstance(Context context){
-        if(sQDUpgradeManager == null){
+    public static final QDUpgradeManager getInstance(Context context) {
+        if (sQDUpgradeManager == null) {
             sQDUpgradeManager = new QDUpgradeManager(context);
         }
         return sQDUpgradeManager;
     }
 
-    public void check(){
+    public void check() {
         int oldVersion = QDPreferenceManager.getInstance(mContext).getVersionCode();
         int currentVersion = sCurrentVersion;
-        if(currentVersion > oldVersion){
-            if(oldVersion == INVALIDATE_VERSION_CODE){
+        if (currentVersion > oldVersion) {
+            if (oldVersion == INVALIDATE_VERSION_CODE) {
                 onNewInstall(currentVersion);
-            }else{
+            } else {
                 onUpgrade(oldVersion, currentVersion);
             }
             QDPreferenceManager.getInstance(mContext).setAppVersionCode(currentVersion);
         }
     }
 
-    private void onUpgrade(int oldVersion, int currentVersion){
-        QDPreferenceManager.getInstance(mContext).setNeedShowUpgradeTip(true);
+    private void onUpgrade(int oldVersion, int currentVersion) {
+        mUpgradeTipTask = new UpgradeTipTask(oldVersion, currentVersion);
     }
 
-    private void onNewInstall(int currentVersion){
-        // 并无法判断是 1.0.7 版本之前升级上来的，还是新装的
-        QDPreferenceManager.getInstance(mContext).setNeedShowUpgradeTip(true);
+    private void onNewInstall(int currentVersion) {
+        mUpgradeTipTask = new UpgradeTipTask(INVALIDATE_VERSION_CODE, currentVersion);
+    }
+
+    public void runUpgradeTipTaskIfExist(Activity activity) {
+        if (mUpgradeTipTask != null) {
+            mUpgradeTipTask.upgrade(activity);
+            mUpgradeTipTask = null;
+        }
     }
 }
